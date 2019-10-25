@@ -63,17 +63,17 @@ class Cli
         gets.chomp.downcase
     end
 
-    # RUNS READ FEATURE: displays read menu, prompts user for input, receives user input
+    # RUNS READ FEATURE: read reviews by school, rating, keyword search; return to main menu
     def run_read_reviews
         read_choice = read_menu
-        if read_choice == "main menu"
-            run
-        elsif read_choice == "school"
+        if read_choice == "school"
             view_by_school
         elsif read_choice == "rating"
             view_by_rating
         elsif read_choice == "keyword"
             search_by_keyword
+        elsif read_choice == "main menu"
+            run
         end
 
         continue_choice = continue_prompt
@@ -93,18 +93,24 @@ class Cli
         gets.chomp.downcase
     end
 
-    # prompts user to select school, displays all reviews by school
-    def view_by_school
+    # prompts user for a school, validates school matches existing list of schools
+    def input_school
         puts "\n"
         puts "Pick a school - Flatiron School, General Assembly, or Makers Academy:"
-        school_name = gets.chomp
-        if school_name == "Flatiron School" || school_name == "General Assembly" || school_name == "Makers Academy"
-            puts "\n"
-            puts School.find_reviews_by_school(school_name)
-        else
+        @school_name = gets.chomp
+        if !(@school_name == "Flatiron School" || @school_name == "General Assembly" || @school_name == "Makers Academy")
             invalid_input
-            view_by_school
+            input_school
+        else
+            @school_name
         end
+    end
+    
+    # prompts user to select school, displays all reviews by school
+    def view_by_school
+        input_school
+        puts "\n"
+        puts School.find_reviews_by_school(@school_name)
     end
 
     # displays ratings menu, prompts user to select filter, displays reviews by ratings by filter
@@ -145,19 +151,9 @@ class Cli
 
     # RUNS SUBMIT FEATURE: prompts user for school, course, rating, and content, receives user input, creates new review
     def submit_review
-        puts "\n"
-        puts "Pick a school - Flatiron School, General Assembly, or Makers Academy:"
-        school_name = gets.chomp
-        # school = School.find_by(name: school_name)
+        input_school
+        school = School.find_by(name: @school_name)
         
-        # school_name_validation
-        if school_name == "Flatiron School" || school_name == "General Assembly" || school_name == "Makers Academy"
-            school = School.find_by(name: school_name)
-        else
-            invalid_input
-            submit_review
-        end
-
         puts "\n"
         puts "Pick a course - Cybersecurity, Data Science, User Experience Design, Software Engineering:"
         course_topic = gets.chomp
@@ -203,7 +199,7 @@ class Cli
         end
     end
 
-    # RUNS MANAGE FEATURE: update review, delete review, main menu
+    # RUNS MANAGE FEATURE: update review, delete review; return to main menu
     def run_manage_reviews
         manage_choice = manage_menu
         if manage_choice == "main menu"
@@ -233,8 +229,8 @@ class Cli
     # displays user's own reviews, prompts user to select and update by review ID, updates selected review's content
     def update_review
         display_user_reviews
-        review_id_validation
-        review_length_validation
+        input_review_id
+        input_review_content
         review = Review.find_review_by_id(@review_id_input)
         @user.update_review_content(review, @new_content)
         @user.reload
@@ -245,7 +241,7 @@ class Cli
     # displays user's own reviews, prompts user to select by review ID, deletes selected review
     def delete_review
         display_user_reviews
-        review_id_validation
+        input_review_id
         review = Review.find_review_by_id(@review_id_input)
         @user.delete_review(review)
         @user.reload
@@ -261,26 +257,26 @@ class Cli
     end
 
     # prompts user for a review id, validates the id matches one of user's reviews
-    def review_id_validation
+    def input_review_id
         puts "\n"
         puts "Enter the number of the review:"
         @review_id_input = gets.chomp.to_i
         if !@user.display_review_ids.include?(@review_id_input)
             invalid_input
-            review_id_validation
+            input_review_id
         else
             @review_id_input
         end
     end
 
     # prompts user for review content, validate user's review length to be at least 1 character
-    def review_length_validation
+    def input_review_content
         puts "\n"
         puts "Now type your new review:"
         @new_content = gets.chomp
         if @new_content.length < 1
             invalid_input
-            review_length_validation
+            input_review_content
         else
             @new_content
         end
