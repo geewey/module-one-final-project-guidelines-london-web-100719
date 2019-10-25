@@ -5,7 +5,9 @@ class School < ActiveRecord::Base
 
     def self.find_reviews_by_school(school_name)
         school = self.find_by(name: school_name)
-        school.reviews.map {|review| "Review ##{review.id}. #{review.content}"}
+        school.reviews.map {|review| "--------------------------------------------
+Review ##{review.id}. Rated #{review.rating}/5 by #{review.user.username}. Course: #{review.course.topic}. School: #{review.school.name}. 
+        #{review.content}"}
     end
 
     def self.find_or_create(name)

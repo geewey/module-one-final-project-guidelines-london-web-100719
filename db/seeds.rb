@@ -18,15 +18,6 @@ table.each do |row|
     Review.create(school: school, course: course, user: user, rating: rating, content: content)
 end
 
-
-# school # convert to instance
-# course # convert to instance
-# user # convert to instance
-# rating # to_i
-# content
-
-
-
 # 10.times do |count|
 #     User.create(username: "username#{count + 1}")
 # end

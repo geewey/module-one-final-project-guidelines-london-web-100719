@@ -4,7 +4,9 @@ class User < ActiveRecord::Base
     has_many :courses, through: :reviews
 
     def display_user_reviews
-        self.reviews.each {|review| puts "Review ##{review.id}. #{review.content}"}
+        self.reviews.map {|review| "--------------------------------------------
+Review ##{review.id}. Rated #{review.rating}/5. Course: #{review.course.topic}. School: #{review.school.name}.
+        #{review.content}"}
     end
 
     def self.find_or_create_by_username(username)
@@ -17,6 +19,11 @@ class User < ActiveRecord::Base
 
     def delete_review(review)
         review.destroy
+    end
+    
+    # returns array
+    def display_review_ids
+        self.reviews.map {|review| review.id}
     end
 
 end
