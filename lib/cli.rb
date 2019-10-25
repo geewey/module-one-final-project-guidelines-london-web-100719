@@ -92,9 +92,16 @@ class Cli
         puts "- main menu : return to main menu"
         gets.chomp.downcase
     end
+    
+    # prompts user to select school, displays all reviews by school
+    def view_by_school
+        input_school
+        puts "\n"
+        puts School.find_reviews_by_school(@school_name)
+    end
 
-    # prompts user for a school, validates school matches existing list of schools
-    def input_school
+      # prompts user for a school, validates school matches existing list of schools
+      def input_school
         puts "\n"
         puts "Pick a school - Flatiron School, General Assembly, or Makers Academy:"
         @school_name = gets.chomp
@@ -104,13 +111,6 @@ class Cli
         else
             @school_name
         end
-    end
-    
-    # prompts user to select school, displays all reviews by school
-    def view_by_school
-        input_school
-        puts "\n"
-        puts School.find_reviews_by_school(@school_name)
     end
 
     # displays ratings menu, prompts user to select filter, displays reviews by ratings by filter
@@ -149,44 +149,16 @@ class Cli
         end
     end
 
-    # RUNS SUBMIT FEATURE: prompts user for school, course, rating, and content, receives user input, creates new review
+    # RUNS SUBMIT FEATURE: creates new review after prompting user for school, course, rating, and content
     def submit_review
         input_school
         school = School.find_by(name: @school_name)
-        
-        puts "\n"
-        puts "Pick a course - Cybersecurity, Data Science, User Experience Design, Software Engineering:"
-        course_topic = gets.chomp
-        # course = Course.find_by(topic: course_topic)
-
-        # course_topic_validation
-        if course_topic == "Cybersecurity" || course_topic == "Data Science" || course_topic == "User Experience Design" || course_topic == "Software Engineering"
-            course = Course.find_by(topic: course_topic)
-        else
-            invalid_input
-            submit_review
-        end
-
-        puts "\n"
-        puts "Enter your rating - 1-5 (5 being highest):"
-        rating = gets.chomp.to_i
-
-        # rating_validation
-        if !rating.between?(1, 5)
-            invalid_input
-            submit_review
-        end
-
-        puts "\n"
-        puts "Enter your review:"
-        content = gets.chomp
-        
-        # content_validation
-        if content.length < 1
-            invalid_input
-            submit_review
-        end
-
+        input_course
+        course = Course.find_by(topic: @course_topic)
+        input_rating
+        rating = @rating
+        input_review_content
+        content = @content
         # creates and saves new instance of review
         review = Review.new(user: @user, school: school, course: course, rating: rating, content: content)
         review.save
@@ -196,6 +168,32 @@ class Cli
         continue_choice = continue_prompt
         if continue_choice == "y"
             run_read_reviews
+        end
+    end
+
+    # prompts user for a course, validates course matches existing list of courses
+    def input_course
+        puts "\n"
+        puts "Pick a course - Cybersecurity, Data Science, User Experience Design, Software Engineering:"
+        @course_topic = gets.chomp
+        if !(@course_topic == "Cybersecurity" || @course_topic == "Data Science" || @course_topic == "Software Engineering" || @course_topic == "User Experience Design")
+            invalid_input
+            input_course
+        else
+            @course_topic
+        end
+    end
+
+    # prompts user for a rating, validates rating is between 1-5, inclusive
+    def input_rating
+        puts "\n"
+        puts "Enter your rating - 1-5 (5 being highest):"
+        @rating = gets.chomp.to_i
+        if !(@rating.between?(1, 5))
+            invalid_input
+            input_rating
+        else
+            @rating
         end
     end
 
@@ -232,7 +230,7 @@ class Cli
         input_review_id
         input_review_content
         review = Review.find_review_by_id(@review_id_input)
-        @user.update_review_content(review, @new_content)
+        @user.update_review_content(review, @content)
         @user.reload
         puts "\n"
         puts "Your review has been submitted. Thank you!"
@@ -272,13 +270,13 @@ class Cli
     # prompts user for review content, validate user's review length to be at least 1 character
     def input_review_content
         puts "\n"
-        puts "Now type your new review:"
-        @new_content = gets.chomp
-        if @new_content.length < 1
+        puts "Enter your review:"
+        @content = gets.chomp
+        if @content.length < 1
             invalid_input
             input_review_content
         else
-            @new_content
+            @content
         end
     end
 
